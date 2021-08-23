@@ -41,12 +41,16 @@ int main()
                 EM.DelPeople();
                 break;
             case 4:
+                EM.EditPeople();
                 break;
             case 5:
+                EM.FindPeople();
                 break;
             case 6:
+                EM.SortPeople();
                 break;
             case 7:
+                EM.Clean();
                 break;
             default:
                 system("cls");

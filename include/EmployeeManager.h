@@ -53,6 +53,18 @@ public:
     //delete people
     void DelPeople();
 
+    //edit people's information
+    void EditPeople();
+
+    //find people
+    void FindPeople();
+
+    //sort people
+    void SortPeople();
+
+    //clean all information
+    void Clean();
+
     //deconstruction
     ~EmployeeManager();
 };

@@ -103,8 +103,20 @@ void EmployeeManager::AddPeople()
             string name;
             int dSelect;
 
+            bool id_exist = true;
             cout << "please enter the id of " << i+1 << " new employee: ";
-            cin >> id;
+            do
+            {
+                cin >> id;
+                int index = this->isExist(id);
+                if (index == -1)
+                {
+                    id_exist = false;
+                }else{
+                    cout << "ID already exists!" << endl;
+                    cout << "Enter a new ID: " << endl;
+                }
+            }while (id_exist);
 
             cout << "please enter the name of " << i+1 << " new employee: ";
             cin >> name;
@@ -292,10 +304,218 @@ void EmployeeManager::DelPeople()
 
 }
 
+void EmployeeManager::EditPeople()
+{
+    if (this->m_FileIsEmpty)
+    {
+        cout << "Empty file or no record!" << endl;
+    }else{
+        cout << "Please enter the id of employee: " << endl;
+        int id;
+        cin >> id;
+
+        int index = this->isExist(id);
+
+        if (index != -1)
+        {
+            delete this->m_peopleArray[index];
+            int newID = 0;
+            string newName = "";
+            int dSelect = 0;
+
+            cout << "found employee with ID" << id << endl;
+            cout << "Please enter new ID: ";
+            cin >> newID;
+            cout << "Please enter new name: ";
+            cin >> newName;
+            cout << "Please enter new category: " << endl;
+            cout << "1. Employee" << endl;
+            cout << "2. Manager" << endl;
+            cout << "3. Boss" << endl;
+            cin >> dSelect;
+
+            People * people = NULL;
+            switch (dSelect)
+            {
+                case 1:
+                    people = new Employee(newID, newName, 1);
+                    break;
+                case 2:
+                    people = new Manager(newID, newName, 2);
+                    break;
+                case 3:
+                    people = new Boss(newID, newName, 3);
+                    break;
+                default:
+                    break;
+                    
+            }
+            this->m_peopleArray[index] = people;
+
+            cout << "You have changed " << newName << "'s inforamtion!" << endl;
+
+            this->save();
+
+        }else{
+            cout << "Could not find this employee in database!" << endl;
+        }
+
+    }
+    system("pause");
+    system("cls");
+}
+
+void EmployeeManager::FindPeople()
+{
+    if (this->m_FileIsEmpty)
+    {
+        cout << "Empty file or no record!" << endl;
+    }else{
+        cout << "Find the employee with: " << endl;
+        cout << "1. ID " << endl;
+        cout << "2. Name " << endl;
+
+        int select = 0;
+        cin >> select;
+
+        if (select == 1)
+        {
+            int id;
+            cout << "Please enter ID: " << endl;
+            cin >> id;
+
+            int index = this->isExist(id);
+            if (index != -1)
+            {
+                cout << "Found as follows: " << endl;
+                this->m_peopleArray[index]->showInfo();
+            }else{
+                cout << "Could not find this employee in database!" << endl;
+            }
+        }else if (select == 2)
+        {
+            string name;
+            cout << "Please enter Name: " << endl;
+            cin >> name;
+
+            bool flag = false;
+            for (int i=0; i < m_peopleNum; i++)
+            {
+                if (m_peopleArray[i]->m_Name == name)
+                {
+                    cout << "Found as follows: " << endl;
+                    flag = true;
+                    this->m_peopleArray[i]->showInfo();
+                }
+            }
+
+            if (flag == false)
+            {
+               cout << "Could not find this employee in database!" << endl; 
+            }
+        }else{
+            cout << "Invalid option!" << endl;
+        }
+    }
+    system("pause");
+    system("cls");
+}
+
+void EmployeeManager::SortPeople()
+{
+    if (this->m_FileIsEmpty)
+    {
+        cout << "Empty file or no record!" << endl;
+        system("pasue");
+        system("cls");
+    }
+    else
+    {
+        cout << "Please enter your sort option: " << endl;
+        cout << "1. Ascending w.r.t. IDs" << endl;
+        cout << "2. Descending w.r.t. IDs" << endl;
+
+        int select = 0;
+        cin >> select;
+        for (int i=0; i < this->m_peopleNum; i++)
+        {
+            int minOrMax = i;
+            for (int j = i+1; j< this->m_peopleNum;j++)
+            {
+                if (select==1)
+                {
+                    if (this->m_peopleArray[minOrMax]->m_ID > this->m_peopleArray[j]->m_ID)
+                    {
+                        minOrMax = j;
+                    }
+                }
+                else
+                {
+                    if (this->m_peopleArray[minOrMax]->m_ID < this->m_peopleArray[j]->m_ID)
+                    {
+                        minOrMax = j;
+                    }
+                }
+            }
+            if (i != minOrMax)
+            {
+                People * temp = this->m_peopleArray[i];
+                this->m_peopleArray[i] = this->m_peopleArray[minOrMax];
+                this->m_peopleArray[minOrMax] = temp;
+            }
+        }
+        cout << "Sorted: " << endl;
+        this->save();
+        this->ShowPeople();
+    }
+}
+
+void EmployeeManager::Clean()
+{
+    cout << "Are you sure to clean all data?" << endl;
+    cout << "1. Sure" << endl;
+    cout << "2. Cancel" << endl;
+
+    int select = 0;
+    cin >> select;
+
+    if (select == 1){
+        ofstream ofs(FILENAME, ios::trunc);
+        ofs.close();
+
+        if (this->m_peopleArray != NULL)
+        {
+            for (int i = 0; i < this->m_peopleNum; i++)
+            {
+                if (this->m_peopleArray[i] != NULL)
+                {
+                    delete this->m_peopleArray[i];                  
+                }
+            }
+            this->m_peopleNum = 0;
+            delete [] this->m_peopleArray;
+            this->m_peopleArray = NULL;
+            this->m_FileIsEmpty = true;
+
+        }
+        cout << "Clean Done!" << endl;
+
+    }
+    system("pause");
+    system("cls");
+}
+
 EmployeeManager::~EmployeeManager()
 {
     if (this->m_peopleArray != NULL)
     {
+        for (int i = 0; i < this->m_peopleNum; i++)
+        {
+            if (this->m_peopleArray[i] != NULL)
+            {
+                delete this->m_peopleArray[i];
+            }
+        }
         delete [] this->m_peopleArray;
         this->m_peopleArray = NULL;
     }
